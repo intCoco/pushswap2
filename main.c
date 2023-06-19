@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: chuchard <chuchard@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/11/24 20:33:41 by chuchard          #+#    #+#             */
-/*   Updated: 2023/05/27 13:48:08 by chuchard         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "push_swap.h"
 #include <limits.h>
 
@@ -29,9 +17,10 @@ void	ft_print_stacks(t_prog pg)
 
 void	ft_exit(t_prog *pg, int c)
 {
+	(void)pg;
 	if (c == 1)
 		ft_putstr_fd("Error\n", 2);
-	if (pg)
+	/*if (pg)
 	{
 		if (pg->a.array)
 			free(pg->a.array);
@@ -40,7 +29,7 @@ void	ft_exit(t_prog *pg, int c)
 		if (pg->sorted)
 			free(pg->sorted);
 	}
-	//system("leaks push_swap");
+	//system("leaks push_swap");*/
 	exit(c);
 }
 
@@ -228,7 +217,7 @@ void	sort_tab(t_prog *pg)
 	ft_sort_int_tab(pg->sorted, pg->a.size);
 }
 
-int	find_closest_min(t_prog pg, t_stack stack, int chunk)
+/*int	find_closest_min(t_prog *pg, t_stack stack, int chunk)
 {
 	int	i;
 	int	from_top;
@@ -239,36 +228,79 @@ int	find_closest_min(t_prog pg, t_stack stack, int chunk)
 	from_bot = -1;
 	while (i < stack.size && from_top == -1)
 	{
-		if (stack.array[i] >= pg.sorted[pg.size / pg.chunk_nb * (chunk - 1)]
-			&& (stack.array[i] <= pg.sorted[pg.size / pg.chunk_nb * chunk]
-				|| chunk == pg.chunk_nb))
+		if (stack.array[i] >= pg->sorted[(pg->size / pg->chunk_nb) * (chunk - 1)]
+			&& (stack.array[i] <= pg->sorted[(pg->size / pg->chunk_nb) * chunk]))
 			from_top = i;
 		// printf("----------\n");
 		// printf("\nvaleur = %d\n", stack.array[i]);
-		// printf("entre %d ", pg.sorted[pg.size / chunk_nb * (chunk - 1)]);
-		// printf("et %d ?\n", pg.sorted[pg.size / chunk_nb * (chunk)]);
+		// printf("entre %d ", pg->sorted[pg->size / chunk_nb * (chunk - 1)]);
+		// printf("et %d ?\n", pg->sorted[pg->size / chunk_nb * (chunk)]);
 		// printf("fromtop =%d\n", from_top);
 		i++;
 	}
 	i = stack.size - 1;
 	while (i >= 0 && from_bot == -1)
 	{
-		if (stack.array[i] >= pg.sorted[pg.size / pg.chunk_nb * (chunk - 1)]
-			&& (stack.array[i] <= pg.sorted[pg.size / pg.chunk_nb * chunk]
-				|| chunk == pg.chunk_nb))
+		if (stack.array[i] >= pg->sorted[(pg->size / pg->chunk_nb) * (chunk - 1)]
+			&& (stack.array[i] <= pg->sorted[(pg->size / pg->chunk_nb) * chunk]))
 			from_bot = i;
 		//printf("\nvaleur =%d\n", stack.array[i]);
-		// printf("entre %d\n", pg.sorted[(pg.size / chunk_nb) * (chunk - 1)]);
-		// printf("et %d\n", pg.sorted[(pg.size / chunk_nb) * (chunk)]);
+		// printf("entre %d\n", pg->sorted[(pg->size / chunk_nb) * (chunk - 1)]);
+		// printf("et %d\n", pg->sorted[(pg->size / chunk_nb) * (chunk)]);
 		// printf("frombot =%d\n", from_bot);
 		// printf("----------\n");
 		i--;
 	}
 	//printf("fromtop = %d, frombot = %d\n", from_top, from_bot);
-	if (from_top <= pg.size - from_bot)
+	if (from_top <= stack.size - from_bot)
 		return (from_top);
 	else
 		return (from_bot);
+}*/
+
+int find_closest_min(t_prog pg, t_stack stack, int chunk)
+{
+    int i;
+    int from_top;
+    int from_bot;
+
+    i = 0;
+    from_top = -1;
+    from_bot = -1;
+    
+    // Recherche de l'index à partir du haut du tableau
+    while (i < stack.size && from_top == -1)
+    {
+        if (stack.array[i] >= pg.sorted[(pg.size / pg.chunk_nb) * (chunk - 1)] &&
+            (stack.array[i] <= pg.sorted[(pg.size / pg.chunk_nb) * chunk]))
+        {
+            from_top = i;
+        }
+        i++;
+    }
+    
+    i = stack.size - 1;
+    
+    // Recherche de l'index à partir du bas du tableau
+    while (i >= 0 && from_bot == -1)
+    {
+        if (stack.array[i] >= pg.sorted[(pg.size / pg.chunk_nb) * (chunk - 1)] &&
+            (stack.array[i] <= pg.sorted[(pg.size / pg.chunk_nb) * chunk]))
+        {
+            from_bot = i;
+        }
+        i--;
+    }
+    
+    // Recherche de l'indice le plus proche d'une extremité
+    if (from_top != -1 && from_bot != -1)
+    {
+        if (from_top <= stack.size - from_bot)
+            return from_top;
+        else
+            return from_bot;
+    }
+    return -1;
 }
 
 void	ft_sort_up_to_500(t_prog *pg)
@@ -277,7 +309,7 @@ void	ft_sort_up_to_500(t_prog *pg)
 	int	i;
 
 	chunk = 1;
-	while (pg->a.size > 0)
+	while (chunk != pg->chunk_nb)
 	{
 		i = find_closest_min(*pg, pg->a, chunk);
 		if (i == -1 && chunk < pg->chunk_nb)
@@ -286,8 +318,24 @@ void	ft_sort_up_to_500(t_prog *pg)
 			ft_top_and_push(&pg->a, i, A);
 		//ft_print_stacks(*pg);
 	}
+	while(pg->a.size > 0)
+		ft_push(&pg->b, B);
 	while (pg->b.size > 0)
 		ft_top_and_push(&pg->b, ft_find_max_idx(pg->b), B);
+}
+
+int checker(t_prog *pg)
+{
+	int	i;
+
+	i = 0;
+	while (i < pg->size-1)
+	{
+		if (pg->a.array[i] > pg->a.array[i+1])
+			return 1;
+		i++;
+	}
+	return 0;
 }
 
 int	main(int ac, char **av)
@@ -320,6 +368,5 @@ int	main(int ac, char **av)
 		ft_sort_up_to_5(pg);
 	else if (pg->size <= 500)
 		ft_sort_up_to_500(pg);
-	//ft_print_stacks(*pg);
 	ft_exit(pg, 0);
 }
